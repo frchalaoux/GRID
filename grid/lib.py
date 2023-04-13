@@ -109,10 +109,7 @@ def find_angle(v1, v2):
     elif dot_product < -1:
         dot_product = -1
     angle = np.arccos(dot_product) * 180 / np.pi
-    if v1[0] * v2[1] - v1[1] * v2[0] > 0:
-        return angle
-    else:
-        return 360 - angle
+    return angle if v1[0] * v2[1] - v1[1] * v2[0] > 0 else 360 - angle
 
 
 def sortPts(pts):
@@ -250,11 +247,7 @@ def rotateNdArray(img, angle):
 
     for i in range(depth):
         imgTemp = img[:, :, i]
-        if imgTemp.max() > 1:
-            val_max = 255
-        else:
-            val_max = 1
-
+        val_max = 255 if imgTemp.max() > 1 else 1
         # create border for the image
         imgTemp[:, 0:2] = val_max
         imgTemp[0:2, :] = val_max
@@ -315,10 +308,7 @@ def rotateBinNdArray(img, angle):
     # crop
     sigX = np.where(imgR.sum(axis=0) != 0)[0]
     sigY = np.where(imgR.sum(axis=1) != 0)[0]
-    imgC = imgR[sigY[0]:sigY[-1], sigX[0]:sigX[-1]]
-
-    # return
-    return imgC
+    return imgR[sigY[0]:sigY[-1], sigX[0]:sigX[-1]]
 
 
 def rotateVec(vec, angle):
@@ -379,7 +369,7 @@ def recover_scale(mat_in, mat_H):
 
 def getFourierTransform(sig):
     sigf = abs(np.fft.fft(sig)/len(sig))
-    return sigf[2:int(len(sigf)/2)]
+    return sigf[2:len(sigf) // 2]
     # return sigf[2:25]
 
 
@@ -389,12 +379,8 @@ def getCardIntercept(sig, angle, imgH=0):
     """
     if angle == 0:
         return sig * 1
-    else:
-        coef = 1 / np.sin(np.pi / 180 * abs(angle))
-        if angle < 0:
-            return sig * coef
-        else:
-            return imgH - sig * coef
+    coef = 1 / np.sin(np.pi / 180 * abs(angle))
+    return sig * coef if angle < 0 else imgH - sig * coef
 
 
 def getSigFromItc(itc, angle, imgH=0):
@@ -402,13 +388,12 @@ def getSigFromItc(itc, angle, imgH=0):
     transform intercept to signal
     """
     if angle < 0 or angle > 90:
-        sig = itc * np.sin(np.pi / 180 * abs(angle))
-    elif angle > 0 and angle <= 90:
-        sig = (imgH - itc) * np.sin(np.pi / 180 * abs(angle))
+        return itc * np.sin(np.pi / 180 * abs(angle))
+    elif angle > 0:
+        return (imgH - itc) * np.sin(np.pi / 180 * abs(angle))
     else:
         # angle = 0
-        sig = itc
-    return sig
+        return itc
 
 
 def getLineABC(slope, intercept):
@@ -451,7 +436,7 @@ def findPeaks(img, nPeaks=0, axis=1, nSmooth=100):
     signal[-2:] = [0, 0]
 
     # gaussian smooth
-    for _ in range(int(len(signal)/30)):
+    for _ in range(len(signal) // 30):
         signal = np.convolve(
             np.array([1, 2, 4, 2, 1])/10, signal, mode='same')
 
@@ -631,7 +616,7 @@ def plotLine(axes, slope, intercept):
 
 def bugmsg(msg, title="DEBUG"):
     if "--test" in sys.argv:
-        print("======%s=====" % title)
+        print(f"======{title}=====")
         print(msg)
 
 
@@ -702,7 +687,7 @@ class GProg(QWidget):
         self.setLayout(self.layout)
         self.move(int(self._pos.x()+(wgW-self._width)/2),
                   int(self._pos.y()+(wgH-self._height)/2))
-        self.resize(int(self._width), int(self._height))
+        self.resize(self._width, self._height)
         self.show()
         self.repaint()
         QApplication.processEvents()
@@ -723,15 +708,13 @@ class GProg(QWidget):
 
 
 def initProgress(size, name=None):
-    if "__main__.py" in sys.argv[0]:
-        # GUI
-        widget = QApplication.activeWindow()
-        obj = GProg(size, name, widget)
-    else:
+    if "__main__.py" not in sys.argv[0]:
         # CLT
-        obj = tqdm(total=size, postfix=name)
+        return tqdm(total=size, postfix=name)
 
-    return obj
+    # GUI
+    widget = QApplication.activeWindow()
+    return GProg(size, name, widget)
 
 
 def updateProgress(obj, n=1, name=None, flag=True):

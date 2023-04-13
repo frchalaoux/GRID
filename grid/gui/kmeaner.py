@@ -296,15 +296,11 @@ class PnKmeaner(QWidget):
 
     def change_k(self):
         value = self.sl_k.value()
-        ls_ft = []
-        for i in range(len(self.ck_ft)):
-            # if i < self.nFeatures:
-            #     self.ck_ft[i].setVisible(True)
-            # else:
-            #     self.ck_ft[i].setVisible(False)
-            if i in range(self.nFeatures) and self.ck_ft[i].isChecked():
-                ls_ft.extend([i])
-
+        ls_ft = [
+            i
+            for i in range(len(self.ck_ft))
+            if i in range(self.nFeatures) and self.ck_ft[i].isChecked()
+        ]
         self.features = ls_ft
         self.sl_cut.setMaximum(value)
         self.gr_k.setTitle("K = %d" % value)

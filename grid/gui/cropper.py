@@ -100,21 +100,20 @@ class Widget_ViewCrop(Widget_Img):
             points = QPolygon([QPoint(self.pts[i][0], self.pts[i][1])
                               for i in range(4)])
             painter.drawPolygon(points)
-        else:
-            if len(self.pts) == 1:
-                painter.drawLine(QPoint(self.pts[0][0], self.pts[0][1]),
-                                 QPoint(self.pos_move[0], self.pos_move[1]))
-            elif len(self.pts) == 2:
-                points = QPolygon([QPoint(self.pts[0][0], self.pts[0][1]),
-                                   QPoint(self.pts[1][0], self.pts[1][1]), 
-                                   QPoint(self.pos_move[0], self.pos_move[1])])
-                painter.drawPolygon(points)
-            elif len(self.pts) == 3:
-                points = QPolygon([QPoint(self.pts[0][0], self.pts[0][1]),
-                                   QPoint(self.pts[1][0], self.pts[1][1]),
-                                   QPoint(self.pts[2][0], self.pts[2][1]),
-                                   QPoint(self.pos_move[0], self.pos_move[1])])
-                painter.drawPolygon(points)
+        elif len(self.pts) == 1:
+            painter.drawLine(QPoint(self.pts[0][0], self.pts[0][1]),
+                             QPoint(self.pos_move[0], self.pos_move[1]))
+        elif len(self.pts) == 2:
+            points = QPolygon([QPoint(self.pts[0][0], self.pts[0][1]),
+                               QPoint(self.pts[1][0], self.pts[1][1]), 
+                               QPoint(self.pos_move[0], self.pos_move[1])])
+            painter.drawPolygon(points)
+        elif len(self.pts) == 3:
+            points = QPolygon([QPoint(self.pts[0][0], self.pts[0][1]),
+                               QPoint(self.pts[1][0], self.pts[1][1]),
+                               QPoint(self.pts[2][0], self.pts[2][1]),
+                               QPoint(self.pos_move[0], self.pos_move[1])])
+            painter.drawPolygon(points)
 
         painter.end()
 
@@ -207,7 +206,7 @@ class Widget_ViewCrop(Widget_Img):
                 # update corner
                 self.pts[self.whichState][0] += dx
                 self.pts[self.whichState][1] += dy
-            elif self.whichState > 3 and self.whichState < 8:
+            elif self.whichState < 8:
                 if self.whichState == 4:
                     # update side N
                     idx1, idx2 = 0, 1
@@ -237,10 +236,10 @@ class Widget_ViewCrop(Widget_Img):
                 self.pts = np.array(
                     rotatePts(self.pts_prev, angle, org), dtype=int).copy()
 
-        # cursor
-        magArea = int(min(self.rgX[1] - self.rgX[0], self.rgY[1] - self.rgY[0]) / 5)
         if self.whichState < 8:
             if self.zoom != 0:
+                # cursor
+                magArea = int(min(self.rgX[1] - self.rgX[0], self.rgY[1] - self.rgY[0]) / 5)
                 magnifying_glass(self, event.pos(),
                                 area=magArea, zoom=self.zoom * 2.5)
             else:

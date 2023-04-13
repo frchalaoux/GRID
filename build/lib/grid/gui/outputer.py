@@ -438,9 +438,9 @@ class Widget_Seg(Widget_Img):
                 self.agent_click.updateCoordinate(value=dx, axis=1)
             elif self.task == 1:
                 # adjust border
-                if self.dir == Dir.NORTH or self.dir == Dir.SOUTH:
+                if self.dir in [Dir.NORTH, Dir.SOUTH]:
                     value = y_move
-                elif self.dir == Dir.WEST or self.dir == Dir.EAST:
+                elif self.dir in [Dir.WEST, Dir.EAST]:
                     value = x_move
                 self.grid.agents.setBorder(self.agent_click, self.dir, value)
             elif self.task == 2:

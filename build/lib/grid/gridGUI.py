@@ -83,7 +83,7 @@ class GRID_GUI(QMainWindow):
         """
 
         # window setup
-        self.setWindowTitle("GRID (%s)" % __version__)
+        self.setWindowTitle(f"GRID ({__version__})")
         self.resize(1280, 700)
         self.centerWindow()
 

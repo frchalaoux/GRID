@@ -58,14 +58,11 @@ def rotateBinNdArray(img, angel):
     # crop
     sigX = np.where(imgR.sum(axis=0) != 0)[0]
     sigY = np.where(imgR.sum(axis=1) != 0)[0]
-    imgC = imgR[sigY[0]:sigY[-1], sigX[0]:sigX[-1]]
-
-    # return
-    return imgC
+    return imgR[sigY[0]:sigY[-1], sigX[0]:sigX[-1]]
 
 def getFourierTransform(sig):
     sigf = abs(np.fft.fft(sig)/len(sig))
-    return sigf[2:int(len(sigf)/2)]
+    return sigf[2:len(sigf) // 2]
     # return sigf[2:25]
 
 def getCardIntercept(lsValues, angel):

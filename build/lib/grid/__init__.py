@@ -13,10 +13,10 @@ if "__main__" not in sys.argv[0]:
     # prevent from re-show welcome message in gridGUI
     # welcome message
     print("~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~")
-    print("                 Welcome to GRID Ver.%s    " % __version__)
+    print(f"                 Welcome to GRID Ver.{__version__}    ")
     print("~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~")
     print("Author      : James Chen <niche@vt.edu>    ")
-    print("Last update : %s              " % __update__)
+    print(f"Last update : {__update__}              ")
     print("User manual : https://poissonfish.github.io/GRID/")
 
     if "-m" not in sys.argv[0]:
@@ -45,16 +45,24 @@ try:
 
         while bol_ans is None:
             ans = input(
-                "A newer version of GRID (ver. %s) is now available, upgrade? (y/n) " % new_version)
+                f"A newer version of GRID (ver. {new_version}) is now available, upgrade? (y/n) "
+            )
             if ans in possible_pos_ans:
                 bol_ans = True
             elif ans in possible_neg_ans:
                 bol_ans = False
 
         if bol_ans:
-            subprocess.check_call([sys.executable,
-                                   '-m', 'pip', 'install',
-                                   'photo_grid==%s' % new_version, '--upgrade'])
+            subprocess.check_call(
+                [
+                    sys.executable,
+                    '-m',
+                    'pip',
+                    'install',
+                    f'photo_grid=={new_version}',
+                    '--upgrade',
+                ]
+            )
             print("\n")
             print("~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~*~~~~~~~~~")
             print("          Please re-launch GRID to finish the update")

@@ -197,11 +197,3 @@ def rotatePts(pts, angle, org=(0, 0)):
     qpts = [[qx[i], qy[i]] for i in range(len(pts))]
     return np.array(qpts)
 
-    ox, oy = origin
-    px, py = point
-
-    ag = np.pi / 180 * angle
-    qx = ox + np.cos(ag) * (px - ox) - np.sin(ag) * (py - oy)
-    qy = oy + np.sin(ag) * (px - ox) + np.cos(ag) * (py - oy)
-    return qx, qy
-

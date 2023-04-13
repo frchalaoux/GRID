@@ -362,13 +362,14 @@ class PnAnchor(QWidget):
         rgWg = self.wgImg.getImgRange()[axis]
         if axis == 0:
             rgMap = (0, self.grid.map.imgW-1)
-            value = rescale(values=pt-self.recImg.x(),
-                            scaleSrc=rgWg, scaleDst=rgMap)
+            return rescale(
+                values=pt - self.recImg.x(), scaleSrc=rgWg, scaleDst=rgMap
+            )
         else:
             rgMap = (0, self.grid.map.imgH-1)
-            value = rescale(values=pt-self.recImg.y(),
-                            scaleSrc=rgWg, scaleDst=rgMap)
-        return value
+            return rescale(
+                values=pt - self.recImg.y(), scaleSrc=rgWg, scaleDst=rgMap
+            )
 
     def mousePressEvent(self, event):
         # ptX, ptY are coordinate in map
@@ -385,21 +386,18 @@ class PnAnchor(QWidget):
                 # search index by signals
                 self.idxAnc = np.abs(
                     ptPress-objMap.sigs[0]).argmin()
+            elif objMap.angles[1] == 0:
+                self.idxAnc = np.abs(self.ptX-objMap.sigs[1]).argmin()
             else:
-                # minor axis
                 slope = objMap.slps[1]
                 intercepts = objMap.itcs[1]
-                # search index by intercepts, will be fine for angle < 0
-                if objMap.angles[1] == 0:
-                    self.idxAnc = np.abs(self.ptX-objMap.sigs[1]).argmin()
-                else:
-                    ls_y = np.array(intercepts) + self.ptX * slope
-                    self.idxAnc = np.abs(self.ptY-ls_y).argmin()
+                ls_y = np.array(intercepts) + self.ptX * slope
+                self.idxAnc = np.abs(self.ptY-ls_y).argmin()
 
     def mouseMoveEvent(self, event):
         pos = event.pos()
-        objMap = self.grid.map
         if self.idxAnc != -1:
+            objMap = self.grid.map
             if self.idx_tool == 0:
                 # major axis
                 ptPos = pos.x() if self.idxMaj == 0 else pos.y()
@@ -409,7 +407,7 @@ class PnAnchor(QWidget):
                     pt = self.getPtGui2Map(ptPos, self.idxMaj)
                 elif ptPos <= rg_wgImg[0]:
                     pt = 0
-                elif ptPos >= rg_wgImg[1]:
+                else:
                     pt = size_img - 1
                 try:
                     objMap.modMajAnchor(self.idxAnc, pt)  # self.ptX
@@ -426,10 +424,7 @@ class PnAnchor(QWidget):
 
                 ptX = self.getPtGui2Map(pos.x(), axis=0)
 
-                if objMap.angles[1] == 0:
-                    self.itc_new = ptX
-                else:
-                    self.itc_new = ptY - ptX * objMap.slps[1]
+                self.itc_new = ptX if objMap.angles[1] == 0 else ptY - ptX * objMap.slps[1]
                 try:
                     objMap.modMinAnchor(self.idxAnc, self.itc_new)  # self.ptY
                 except Exception:
@@ -466,10 +461,7 @@ class PnAnchor(QWidget):
             else:
                 # add tick minor
                 # check if angle is 0 or not:
-                if objMap.angles[1] == 0:
-                    new_itc = ptX
-                else:
-                    new_itc = ptY - ptX * objMap.slps[1]
+                new_itc = ptX if objMap.angles[1] == 0 else ptY - ptX * objMap.slps[1]
                 # pass itc
                 if self.ptYpress == ptY and abs(itc-new_itc).min() > itc.std() / 20:
                     objMap.addMinAnchor(new_itc)

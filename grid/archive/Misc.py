@@ -15,7 +15,7 @@ def get_peak(img, map, n_smooth=100, axis=0):
     # compute signal
     ls_mean = img.mean(axis=(not axis)*1) # 0:nrow
     # gaussian smooth signal
-    for i in range(n_smooth):
+    for _ in range(n_smooth):
         ls_mean = np.convolve(np.array([1, 2, 4, 2, 1])/10, ls_mean, mode='same')
     peaks, _ = find_peaks(ls_mean)
     if map is not None:

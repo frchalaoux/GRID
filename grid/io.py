@@ -94,14 +94,13 @@ def loadImg(path):
 
 
 def getBandUint8(band, dtype):
-    if "float" in dtype:
-        band[band < 0] = 0
-        band_int8 = (band - band.min()) * 255 / \
-                    (np.quantile(band, .999) - band.min())
-        band_int8[band_int8 > 255] = 255
-        return band_int8
-    else:
+    if "float" not in dtype:
         return band
+    band[band < 0] = 0
+    band_int8 = (band - band.min()) * 255 / \
+                (np.quantile(band, .999) - band.min())
+    band_int8[band_int8 > 255] = 255
+    return band_int8
 
 
 def loadImgWeb(URL):
@@ -218,7 +217,7 @@ def saveDT(grid, path, prefix="GRID", simple=True):
     #     cluster += 1
 
     # append columns based on the dict
-    for key, _ in dicIdx.items():
+    for key in dicIdx:
         df[key] = None
         df[key + "_std"] = None
 
@@ -366,17 +365,16 @@ def saveH5(grid, path, prefix="GRID"):
                 imgBin = grid.imgs.get("bin")[:, rgX][rgY, :]
                 imgFin = np.multiply(imgAll, np.expand_dims(imgBin, 2))
             except Exception as e:
-                print("%s: The plot is out of the borders" % key)
+                print(f"{key}: The plot is out of the borders")
                 print(e)
 
             # export image
             try:
                 with h5py.File(pathH5, "a") as f:
                     f.create_dataset(key, data=imgFin, compression="gzip")
-                    f.create_dataset(key+"_raw", data=imgAll,
-                                     compression="gzip")
+                    f.create_dataset(f"{key}_raw", data=imgAll, compression="gzip")
             except Exception as e:
-                print("Failed to save %s" % key)
+                print(f"Failed to save {key}")
                 print(e)
 
 
@@ -441,7 +439,7 @@ def saveShape(grid, path, prefix="GRID"):
                 # input shape file
                 f.poly([pts_rec])
             except Exception as e:
-                print("%s: The plot is out of the borders" % entry["var"])
+                print(f'{entry["var"]}: The plot is out of the borders')
                 print(e)
 
             # attributes
@@ -466,26 +464,16 @@ def get_valid_range(agent, img, is_border=False):
     imgH, imgW = img.shape
 
     # adjust to valid ranges
-    if bn < 0:
-        bn = 0
-    if bw < 0:
-        bw = 0
-    if bs > imgH:
-        # height
-        bs = imgH
-    if be >= imgW:
-        # width
-        be = imgW
-
+    bn = max(bn, 0)
+    bw = max(bw, 0)
+    bs = min(bs, imgH)
+    be = min(be, imgW)
     # make ranges
     rg_row = range(bn, bs)
     rg_col = range(bw, be)
 
     # return
-    if is_border:
-        return bn, bs, bw, be
-    else:
-        return rg_row, rg_col
+    return (bn, bs, bw, be) if is_border else (rg_row, rg_col)
 
 
 # # create the PRJ file

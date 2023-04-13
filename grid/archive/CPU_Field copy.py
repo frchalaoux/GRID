@@ -79,7 +79,7 @@ class Field():
         for row in range(self.nrow):
             for col in range(self.ncol):
                 agent_self = self.get_agent(row, col)
-                rg_temp = dict()
+                rg_temp = {}
                 for axis in [0, 1]:
                     # extract direction info and 1dImg
                     dir_1 = Dir(axis) # axis:0, return N(0) and S(2)
@@ -149,12 +149,11 @@ class Field():
         for row in range(self.nrow):
             for col in range(self.ncol):
                 agent_self = self.get_agent(row, col)
-                for dir in list([Dir.EAST, Dir.SOUTH]):
-                    agent_neig = self.get_agent_neighbor(row, col, dir)
-                    dir_neig = list(Dir)[(dir.value+2)%4] # reverse the direction
-                    if agent_neig:
+                for dir in [Dir.EAST, Dir.SOUTH]:
+                    if agent_neig := self.get_agent_neighbor(row, col, dir):
                         # reset agent border
                         agent_self.border[dir.name] = agent_self.border_reset[dir.name]
+                        dir_neig = list(Dir)[(dir.value+2)%4] # reverse the direction
                         agent_neig.border[dir_neig.name] = agent_neig.border_reset[dir_neig.name]
                         # calculate border
                         dist_agents = abs(agent_self.x-agent_neig.x) if dir==Dir.EAST else abs(agent_self.y-agent_neig.y)
@@ -205,9 +204,9 @@ class Field():
         '''
         k_blur = np.array((
             [1, 4, 1],\
-            [4, 9, 4],\
-            [1, 4, 1]), dtype='int')/29
-        for i in range(n_denoise):
+                [4, 9, 4],\
+                [1, 4, 1]), dtype='int')/29
+        for _ in range(n_denoise):
             img = convolve2d(img, k_blur, mode="same")
         img[img>0.5] = 1
         img[img<=0.5] = 0
@@ -291,9 +290,7 @@ class Field():
                 agent = self.get_agent(row, col)
                 entry = dict(var=agent.name)
                 df_final.loc[len(df_final)] = entry
-        # get cluster
-        cluster = 0
-        for i in self.ls_bin:
+        for cluster, i in enumerate(self.ls_bin):
             img_index = ((np.isin(self.img_k, i))*1).astype(np.int)
             df = pd.DataFrame(columns=['var', 'index'])
             for row in range(self.nrow):
@@ -310,7 +307,6 @@ class Field():
                     df.loc[len(df)] = entry
             df.columns = ['var', "cluster_%d"%cluster]
             df_final = pd.merge(df_final, df, on='var', how='left')
-            cluster += 1
         return df_final
     def align(self, method, axis=0):
         '''
@@ -333,7 +329,7 @@ class Field():
                     for col in range(self.ncol):
                         agent = self.get_agent(row=row, col=col)
                         val_temp = agent.y
-                        val = val_temp if val_temp<val else val
+                        val = min(val_temp, val)
                     for col in range(self.ncol):
                         agent = self.get_agent(row=row, col=col)
                         dist = val - agent.y
@@ -344,7 +340,7 @@ class Field():
                     for row in range(self.nrow):
                         agent = self.get_agent(row=row, col=col)
                         val_temp = agent.x
-                        val = val_temp if val_temp<val else val
+                        val = min(val_temp, val)
                     for row in range(self.nrow):
                         agent = self.get_agent(row=row, col=col)
                         dist = val - agent.x
@@ -357,7 +353,7 @@ class Field():
                     for col in range(self.ncol):
                         agent = self.get_agent(row=row, col=col)
                         val_temp = agent.y
-                        val = val_temp if val_temp>val else val
+                        val = max(val_temp, val)
                     for col in range(self.ncol):
                         agent = self.get_agent(row=row, col=col)
                         dist = val - agent.y
@@ -368,7 +364,7 @@ class Field():
                     for row in range(self.nrow):
                         agent = self.get_agent(row=row, col=col)
                         val_temp = agent.x
-                        val = val_temp if val_temp>val else val
+                        val = max(val_temp, val)
                     for row in range(self.nrow):
                         agent = self.get_agent(row=row, col=col)
                         dist = val - agent.x
