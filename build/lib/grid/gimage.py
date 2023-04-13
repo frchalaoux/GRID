@@ -295,13 +295,13 @@ class GImage():
         self.set(key='visSeg', value=imgSeg)
 
     def rankCenters(self, k, center, colorOnly=False):
-        scores = []
-
         if colorOnly:
             ratioK = [(center[i, 0]-center[i, 1])/center[i, :].sum()
                       for i in range(center.shape[0])]
-            rank = np.flip(np.argsort(ratioK), axis=0)
+            return np.flip(np.argsort(ratioK), axis=0)
         else:
+            scores = []
+
             for i in range(k):
                 imgB = (np.isin(self.get('kmean'), i)*1).astype(np.int)
                 sigs = imgB.mean(axis=0)
@@ -316,9 +316,7 @@ class GImage():
 
                 score = scMaxF*.25 + scMean*.25 + scPeaks*.5
                 scores.append(score)
-            rank = np.flip(np.array(scores).argsort(), axis=0)
-
-        return rank
+            return np.flip(np.array(scores).argsort(), axis=0)
 
     def rotate(self, nRot):
         """
@@ -330,7 +328,7 @@ class GImage():
         self.n_rot += nRot
 
         for key in self.imgs.keys():
-            if key == 'raw' or key == 'rawRs':
+            if key in ['raw', 'rawRs']:
                 # only rotate cropped images
                 continue
             try:

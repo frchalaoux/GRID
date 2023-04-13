@@ -57,11 +57,12 @@ class Widget_Img(QWidget):
             self.rgY = (0, self.sizeImg.height())
 
     def isInRange(self, x, y):
-        if x >= self.rgX[0] and x <= self.rgX[1] and\
-           y >= self.rgY[0] and y <= self.rgY[1]:
-            return True
-        else:
-            return False
+        return (
+            x >= self.rgX[0]
+            and x <= self.rgX[1]
+            and y >= self.rgY[0]
+            and y <= self.rgY[1]
+        )
 
     def getImgRange(self):
         return self.rgX, self.rgY
@@ -113,7 +114,10 @@ def getGrayQImg(img):
 def magnifying_glass(widget, pos, area=200, zoom=4):
     size = int(area/zoom)
     pixmap = widget.grab(
-        QRect(QPoint(pos.x()-int(size/2), pos.y()-int(size/2)), QSize(size, size)))
+        QRect(
+            QPoint(pos.x() - size // 2, pos.y() - size // 2), QSize(size, size)
+        )
+    )
     try:
         rate_screen = size / pixmap.width()
         pixmap = pixmap.scaled(int(area/rate_screen), int(area/rate_screen))

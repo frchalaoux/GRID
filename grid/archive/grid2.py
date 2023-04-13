@@ -37,7 +37,7 @@ class GRID(QMainWindow):
         self.bt_back = QPushButton()
         self.Layout = None
         # params
-        self.params = dict()
+        self.params = {}
         # image-related
         self.img_raw = None
         self.img_crop = None

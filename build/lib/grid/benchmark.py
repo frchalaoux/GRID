@@ -86,7 +86,7 @@ for i in range(100):
         # time the loading process
         t_cur = time.time()
         grid = gd.GRID()
-        grid.loadData("size/size_%sgb.tif" % key)
+        grid.loadData(f"size/size_{key}gb.tif")
         elapse = round(time.time() - t_cur, 4)
         # export results
         with open("benchmark_size.csv", "a") as f:
@@ -103,7 +103,7 @@ dic_plot = {"50": (50, 5, 10),
             "200": (200, 10, 20)}
 
 for i in range(100):
-    for key, val in dic_plot.items():
+    for val in dic_plot.values():
         nplot, nrow, ncol = val
         grid = gd.GRID()
         grid.loadData("plot/plot_%d.tif" % nplot)

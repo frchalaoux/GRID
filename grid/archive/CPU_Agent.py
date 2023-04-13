@@ -11,8 +11,8 @@ class Agent():
         self.y, self.x = 0, 0
         self.y_reset, self.x_reset = 0, 0
         self.pre_rg_W, self.pre_rg_H = range(0), range(0)
-        self.border, self.border_reset = dict(), dict()
-        for dir in list([Dir.NORTH, Dir.EAST, Dir.SOUTH, Dir.WEST]):
+        self.border, self.border_reset = {}, {}
+        for dir in [Dir.NORTH, Dir.EAST, Dir.SOUTH, Dir.WEST]:
             self.border[dir.name] = 0
             self.border_reset[dir.name] = 0
     def get_col(self):
@@ -75,7 +75,7 @@ class Agent():
         self.x = int((rg['EAST']+rg['WEST'])/2)
         self.y = int((rg['NORTH']+rg['SOUTH'])/2)
         self.x_reset, self.y_reset = self.x, self.y
-        for dir in list([Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]):
+        for dir in [Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]:
             self.border_reset[dir.name] = self.border[dir.name]
     def set_border(self, dir, value):
         '''
@@ -101,10 +101,8 @@ class Agent():
             self.border[Dir.EAST.name] += val
         self.check_border()
     def check_border(self):
-        if self.border[Dir.NORTH.name]<0:
-            self.border[Dir.NORTH.name] = 0
-        if self.border[Dir.WEST.name]<0:
-            self.border[Dir.WEST.name] = 0
+        self.border[Dir.NORTH.name] = max(self.border[Dir.NORTH.name], 0)
+        self.border[Dir.WEST.name] = max(self.border[Dir.WEST.name], 0)
         if self.border[Dir.SOUTH.name]>=self.imgH:
             self.border[Dir.SOUTH.name] = self.imgH-1
         if self.border[Dir.EAST.name]>=self.imgW:
@@ -116,5 +114,5 @@ class Agent():
         self.y = self.y_reset
         self.reset_border()
     def reset_border(self):
-        for dir in list([Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]):
+        for dir in [Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]:
             self.border[dir.name] = self.border_reset[dir.name]

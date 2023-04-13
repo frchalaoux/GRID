@@ -470,17 +470,15 @@ class Widget_Seg(Widget_Img):
                 posY = pos.y()/self.ratio
             # adjust border
             if self.task==1:
-                if self.dir==Dir.NORTH or self.dir==Dir.SOUTH:
+                if self.dir in [Dir.NORTH, Dir.SOUTH]:
                     value = posY
-                elif self.dir==Dir.WEST or self.dir==Dir.EAST:
+                elif self.dir in [Dir.WEST, Dir.EAST]:
                     value = posX
                 self.agent_click.set_border(self.dir, value)
-            # V pan
             elif self.task==2:
                 value = posY
                 row = self.agent_click.row
                 self.field.pan(axis=0, target=row, value=value)
-            # H pan
             elif self.task==3:
                 value = posX
                 col = self.agent_click.col

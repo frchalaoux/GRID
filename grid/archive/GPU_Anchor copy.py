@@ -229,8 +229,7 @@ class Panel_Anchor(QWidget):
         anchor_y_org = scaleToOrig(self.acr_r, imgH)
         list = []
         for posY in anchor_y_org:
-            for posX in anchor_x_org:
-                list.append(dict(x=posX, y=posY))
+            list.extend(dict(x=posX, y=posY) for posX in anchor_x_org)
         return list, len(self.acr_c), len(self.acr_r)
 
 

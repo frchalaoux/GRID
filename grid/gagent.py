@@ -44,7 +44,6 @@ class GAgent():
         # get nrow, ncol, and data.frame
         if not gimg.hasShp:
             self.nRow, self.nCol = gmap.nRow, gmap.nCol
-            dt = gmap.dt
         else:
             '''
             A case when a shapefile is loaded
@@ -89,8 +88,8 @@ class GAgent():
                 bd_w, bd_n = np.min(pts_crop, axis=0)
                 bd_e, bd_s = np.max(pts_crop, axis=0)
                 # examine the border
-                bd_w = 0 if bd_w < 0 else bd_w
-                bd_n = 0 if bd_n < 0 else bd_n
+                bd_w = max(bd_w, 0)
+                bd_n = max(bd_n, 0)
                 bd_e = self.imgW - 1 if bd_e >= self.imgW else bd_e
                 bd_s = self.imgH - 1 if bd_s >= self.imgH else bd_s
                 # put in the list
@@ -102,8 +101,8 @@ class GAgent():
                 row, col = np.array(att_ag[1:3], dtype=int)
                 ls_row.append(row)
                 ls_col.append(col)
-                nrow = row if row > nrow else nrow
-                ncol = col if col > ncol else ncol
+                nrow = max(row, nrow)
+                ncol = max(col, ncol)
                 # get name
                 name = att_ag[0]
                 ls_id.append(name)
@@ -117,8 +116,7 @@ class GAgent():
             gmap.dt = pd.DataFrame(
                 {"var": ls_id, "row": ls_row, "col": ls_col, "pt": ls_ct,
                  "bd_w": ls_w, "bd_n": ls_n, "bd_e": ls_e, "bd_s": ls_s})
-            dt = gmap.dt
-
+        dt = gmap.dt
         # initialize agents
         fr, fc = [], []
         for row in range(self.nRow):
@@ -164,12 +162,11 @@ class GAgent():
         if row < 0 or col < 0:
             # negative index
             return False
-        else:
-            try:
-                return self.agents[int(row)][int(col)]
-            except Exception:
-                # outside frame
-                return False
+        try:
+            return self.agents[int(row)][int(col)]
+        except Exception:
+            # outside frame
+            return False
 
     def getNeib(self, row, col, dir):
         """
@@ -237,7 +234,7 @@ class GAgent():
                 agentSelf.resetBorderHard()
                 if not agentSelf or agentSelf.isFake():
                     continue
-                rgTemp = dict()
+                rgTemp = {}
                 for axis in [0, 1]:
                     # extract direction info and 1dImg
                     dir1 = Dir(axis)  # axis:0, return N(0) and S(2)
@@ -330,7 +327,7 @@ class GAgent():
             updateProgress(prog, flag=self.subflag)
             for col in range(self.nCol):
                 agentSelf = self.get(row, col)
-                for dir in list([Dir.EAST, Dir.SOUTH]):
+                for dir in [Dir.EAST, Dir.SOUTH]:
                     agentNeib = self.getNeib(row, col, dir)
                     dirNeib = list(Dir)[(dir.value+2) %
                                          4]  # reverse the direction
@@ -446,10 +443,8 @@ class GAgent():
                     None
 
     def checkBorder(self, agent):
-        if agent.border[Dir.NORTH.name] < 0:
-            agent.border[Dir.NORTH.name] = 0
-        if agent.border[Dir.WEST.name] < 0:
-            agent.border[Dir.WEST.name] = 0
+        agent.border[Dir.NORTH.name] = max(agent.border[Dir.NORTH.name], 0)
+        agent.border[Dir.WEST.name] = max(agent.border[Dir.WEST.name], 0)
         if agent.border[Dir.SOUTH.name] >= self.imgH:
             agent.border[Dir.SOUTH.name] = self.imgH-1
         if agent.border[Dir.EAST.name] >= self.imgW:
@@ -480,7 +475,7 @@ class GAgent():
                         if not agent or agent.isFake():
                             continue
                         val_temp = agent.y
-                        val = val_temp if val_temp < val else val
+                        val = min(val_temp, val)
                     for col in range(self.nCol):
                         agent = self.get(row=row, col=col)
                         if not agent or agent.isFake():
@@ -495,7 +490,7 @@ class GAgent():
                         if not agent or agent.isFake():
                             continue
                         val_temp = agent.x
-                        val = val_temp if val_temp < val else val
+                        val = min(val_temp, val)
                     for row in range(self.nRow):
                         agent = self.get(row=row, col=col)
                         if not agent or agent.isFake():
@@ -512,7 +507,7 @@ class GAgent():
                         if not agent or agent.isFake():
                             continue
                         val_temp = agent.y
-                        val = val_temp if val_temp > val else val
+                        val = max(val_temp, val)
                     for col in range(self.nCol):
                         agent = self.get(row=row, col=col)
                         if not agent or agent.isFake():
@@ -527,7 +522,7 @@ class GAgent():
                         if not agent or agent.isFake():
                             continue
                         val_temp = agent.x
-                        val = val_temp if val_temp > val else val
+                        val = max(val_temp, val)
                     for row in range(self.nRow):
                         agent = self.get(row=row, col=col)
                         if not agent or agent.isFake():
@@ -632,8 +627,8 @@ class Agent():
         self.y_float, self.x_float = 0.0, 0.0  # range from 0 to 0.9999
         self.y_reset, self.x_reset = 0, 0
         self.pre_rg_W, self.pre_rg_H = range(0), range(0)
-        self.border, self.border_reset = dict(), dict()
-        for dir in list([Dir.NORTH, Dir.EAST, Dir.SOUTH, Dir.WEST]):
+        self.border, self.border_reset = {}, {}
+        for dir in [Dir.NORTH, Dir.EAST, Dir.SOUTH, Dir.WEST]:
             self.border[dir.name] = 0
             self.border_reset[dir.name] = 0
 
@@ -686,7 +681,7 @@ class Agent():
         # self.x = int((rg['EAST']+rg['WEST'])/2)
         # self.y = int((rg['NORTH']+rg['SOUTH'])/2)
         # self.x_reset, self.y_reset = self.x, self.y
-        for dir in list([Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]):
+        for dir in [Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]:
             self.border_reset[dir.name] = self.border[dir.name]
 
     def setBorder(self, dir, value):
@@ -732,7 +727,7 @@ class Agent():
         self.resetBorder()
 
     def resetBorder(self):
-        for dir in list([Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]):
+        for dir in [Dir.NORTH, Dir.WEST, Dir.SOUTH, Dir.EAST]:
             self.border[dir.name] = self.border_reset[dir.name]
 
     def resetBorderHard(self):

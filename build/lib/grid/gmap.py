@@ -101,9 +101,7 @@ class GMap():
             sigFour = getFourierTransform(sig)
             sc.append(max(sigFour))
 
-        # angle with maximum score win
-        scSort = sc.copy()
-        scSort.sort()
+        scSort = sorted(sc)
         idxMax = [i for i in range(len(sc)) if (sc[i] in scSort[-2:])]
         angles = np.array([rangeAngle[idx] for idx in idxMax])
 
@@ -165,7 +163,7 @@ class GMap():
         sig = findPeaks(img=imgR_bin, nPeaks=nSig, nSmooth=nSmooth)[0]
         intercept = getCardIntercept(sig, angle, self.imgH)
         if isinstance(intercept, int):
-            intercept = list([intercept])
+            intercept = [intercept]
         return sig, intercept
 
     def getDfCoordinate(self, angles, slopes, intercepts):
@@ -191,8 +189,7 @@ class GMap():
         plotsMin = []
         pts = []
 
-        pMaj = 0
-        for itcMaj in itc_maj:  # major
+        for pMaj, itcMaj in enumerate(itc_maj):  # major
             pMin = 0
             for itcMin in itc_min:  # minor
                 ptX, ptY = solveLines(
@@ -211,8 +208,6 @@ class GMap():
                     plotsMin.append(pMin)
                     pts.append((ptX, ptY))
                     pMin += 1
-            pMaj += 1
-
         # col order would be flipped if the angle is greater than zero
         if angles[1] > 0 and angles[1] < 90 and angles[0] != 0:
             plotsMin = plotsMin[::-1]

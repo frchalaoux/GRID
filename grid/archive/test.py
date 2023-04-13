@@ -53,7 +53,7 @@ plt.show()
 
 signal = grid.map.imgs[1].mean(axis=0)
 # gaussian smooth
-for i in range(3):
+for _ in range(3):
     signal = np.convolve(
         np.array([1, 2, 4, 2, 1])/10, signal, mode='same')
 peaks, _ = find_peaks(signal)
@@ -127,10 +127,7 @@ def rotateBinNdArray(img, angel):
     # crop 
     sigX = np.where(imgR.sum(axis=0)!=0)[0]
     sigY = np.where(imgR.sum(axis=1)!=0)[0]
-    imgC = imgR[sigY[0]:sigY[-1], sigX[0]:sigX[-1]]
-
-    # return 
-    return imgC
+    return imgR[sigY[0]:sigY[-1], sigX[0]:sigX[-1]]
 
 angel = 60
 imgR = rotateBinNdArray(img, angel)
